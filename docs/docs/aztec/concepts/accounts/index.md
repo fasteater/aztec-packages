@@ -18,7 +18,7 @@ Some account features unlocked by account abstraction are account recovery, gas 
 
 ### Protocol vs application level
 
-AA can be implemented at the protocol level is called native Account Abstraction. In this case, all the accounts on the network are smart contracts. AA can also be implemented at the smart-contract level, then we call it non-native Account Abstraction. In this case, there might be both EOAs and accounts controlled by smart contracts.
+AA can be implemented at the protocol level, which is called native Account Abstraction. In this case, all the accounts on the network are smart contracts. AA can also be implemented at the smart-contract level, then we call it non-native Account Abstraction. In this case, there might be both EOAs and accounts controlled by smart contracts.
 
 In the case of Aztec, we have native Account Abstraction.
 
@@ -108,7 +108,7 @@ Users will need to pay transaction fees in order to deploy their account contrac
 
 ## What is an account address
 
-Address is derived from the [address keys](keys.md#address-keys). While the AddressPublicKey is an elliptic curve point of the form (x,y) on the [Grumpkin elliptic curve](https://github.com/AztecProtocol/aztec-connect/blob/9374aae687ec5ea01adeb651e7b9ab0d69a1b33b/markdown/specs/aztec-connect/src/primitives.md), the address is its x coordinate. The corresponding y coordinate can be derived if needed. For x to be a legitimate address, address there should exist a corresponding y that satisfies the curve equation. Any field element cannot work as an address.
+Address is derived from the [address keys](keys.md#address-keys). While the AddressPublicKey is an elliptic curve point of the form (x,y) on the [Grumpkin elliptic curve](https://github.com/AztecProtocol/aztec-connect/blob/9374aae687ec5ea01adeb651e7b9ab0d69a1b33b/markdown/specs/aztec-connect/src/primitives.md), the address is its x coordinate. The corresponding y coordinate can be derived if needed. For x to be a legitimate address, there should exist a corresponding y that satisfies the curve equation. Not all field elements can work as an address.
 
 ### Complete address
 
@@ -128,9 +128,9 @@ Account contracts are also expected, though not required by the protocol, to imp
 
 When executing a private function, this authorization is checked by requesting an authentication witness from the execution oracle, which is usually a signed message. Authentication Witness is a scheme for authenticating actions on Aztec, so users can allow third-parties (e.g. contracts) to execute an action on their behalf.
 
-The user's [Private eXecution Environment (PXE)](../pxe/index.md) is responsible for storing these auth witnesses and returning them to the requesting account contract. Auth witnesses can belong to the current user executing the local transaction, or to another user who shared it out-of-band.
+The user's [Private Execution Environment (PXE)](../pxe/index.md) is responsible for storing these auth witnesses and returning them to the requesting account contract. Auth witnesses can belong to the current user executing the local transaction, or to another user who shared it out-of-band.
 
-However, during a public function execution, it is not possible to retrieve a value from the local [oracle](../../smart_contracts/oracles/index.md). To support authorizations in public functions, account contracts should save in a public authwit registry what actions have been pre-authorized by their owner.
+However, during a public function execution, it is not possible to retrieve a value from the local [oracle](../../smart_contracts/oracles/index.md). To support authorizations in public functions, account contracts should save owner pre-authorized actions in a public authwit registry.
 
 These two patterns combined allow an account contract to answer whether an action `is_valid_impl` for a given user both in private and public contexts.
 
@@ -152,13 +152,13 @@ Nonce is a unique number and it is utilized for replay protection (i.e. preventi
 
 In particular, nonce management defines what it means for a transaction to be canceled, the rules of transaction ordering, and replay protection. In Ethereum, nonce is enshrined into the protocol. On the Aztec network, nonce is abstracted i.e. if a developer wants to customize it, they get to decide how they handle replay protection, transaction cancellation, as well as ordering.
 
-Take as an example the transaction cancellation logic. It can be done through managing nullifiers. Even though we usually refer to a nullifier as a creature utilized to consume a note, in essence, a nullifier is an emitted value whose uniqueness is guaranteed by the protocol. If we want to cancel a transaction before it was mined, we can send another transaction with higher gas price that emits the same nullifier (i.e. nullifier with the same value, for example, 5). The second transaction will invalidate the original one, since nullifiers cannot be repeated.
+Take the transaction cancellation logic as an example. It can be done through managing nullifiers, even though we usually associate nullifiers to note consumption. In essence, a nullifier is an emitted value whose uniqueness is guaranteed by the protocol. If we want to cancel a transaction before it was mined, we can send another transaction with higher gas price that emits the same nullifier (i.e. nullifier with the same value, for example, 5). The second transaction will invalidate the original one, since nullifiers cannot be repeated.
 
 Nonce abstraction is mostly relevant to those building wallets. For example, a developer can design a wallet that allows sending big transactions with very low priority fees because the transactions are not time sensitive (i.e. the preference is that a transaction is cheap and doesn't matter if it is slow). If one tries to apply this logic today on Ethereum (under sequential nonces), when they send a large, slow transaction they can't send any other transactions until that first large, slow transaction is processed.
 
 ### Fee abstraction
 
-It doesn't have to be the transaction sender who pays the transaction fees. Wallets or dapp developers can choose any payment logic they want using a paymaster. To learn more about fees on Aztec – check [this page](../fees.md).
+It doesn't have to be the transaction sender who pays the transaction fees. Wallets or dapp developers can choose any payment logic they want using a paymaster. To learn more about fees on Aztec – check out [this page](../fees.md).
 
 Paymaster is a contract that can pay for transactions on behalf of users. It is invoked during the private execution stage and set as the fee payer.
 
